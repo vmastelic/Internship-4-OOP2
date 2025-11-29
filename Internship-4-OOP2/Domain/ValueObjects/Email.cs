@@ -22,7 +22,6 @@ namespace Internship_4_OOP2.Domain.ValueObjects
 
             Value = value;
         }
-
         public override string ToString() => Value;
     }
 }
