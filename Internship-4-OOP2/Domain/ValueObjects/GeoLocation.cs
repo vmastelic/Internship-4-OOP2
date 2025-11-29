@@ -5,10 +5,10 @@ namespace Internship_4_OOP2.Domain.ValueObjects
 {
     public class GeoLocation
     {
-        public decimal Lat { get; }
-        public decimal Lng { get; }
+        public double Lat { get; }
+        public double Lng { get; }
 
-        public GeoLocation(decimal lat, decimal lng)
+        public GeoLocation(double lat, double lng)
         {
             if (lat < -90 || lat > 90)
                 throw new ValidationException(

@@ -8,8 +8,8 @@
         public string Email { get; set; } = null!;
         public string Street { get; set; } = null!;
         public string City { get; set; } = null!;
-        public decimal Lat { get; set; }
-        public decimal Lng { get; set; }
+        public double Lat { get; set; }
+        public double Lng { get; set; }
         public string? Website { get; set; }
         public string CompanyName { get; set; } = null!;
     }

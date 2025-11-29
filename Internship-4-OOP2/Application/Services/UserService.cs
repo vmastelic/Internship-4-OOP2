@@ -11,10 +11,10 @@ namespace Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly GeoLocation _referenceLocation;
-        public UserService(IUserRepository userRepository, GeoLocation referenceLocation)
+        public UserService(IUserRepository userRepository, double refLat, double refLng)
         {
             _userRepository = userRepository;
-            _referenceLocation = referenceLocation;
+            _referenceLocation = new GeoLocation(refLat, refLng);
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetAllAsync()

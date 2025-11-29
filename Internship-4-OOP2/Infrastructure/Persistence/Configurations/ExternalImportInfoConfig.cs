@@ -8,8 +8,16 @@ namespace Internship_4_OOP2.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ExternalImportInfo> builder)
         {
+            builder.ToTable("externalimportinfo");
+
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.LastImportedAt).IsRequired();
+
+            builder.Property(x => x.Id)
+                .HasColumnName("id");
+
+            builder.Property(x => x.LastImportedAt)
+                .HasColumnName("lastimportedat");
+
         }
     }
 }

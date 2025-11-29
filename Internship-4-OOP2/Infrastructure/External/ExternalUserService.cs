@@ -3,6 +3,7 @@ using Domain.Enums;
 using Domain.Exceptions;
 using Internship_4_OOP2.Application.DTOs.External;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Internship_4_OOP2.Infrastructure.External
 {
@@ -20,27 +21,28 @@ namespace Internship_4_OOP2.Infrastructure.External
         {
             try
             {
-                var users = await _http.GetFromJsonAsync<List<dynamic>>("users");
+                var users = await _http.GetFromJsonAsync<List<JsonElement>>("users");
 
                 if (users == null)
-                    throw new ValidationException(
-                        "External data empty or malformed.",
-                        "EXT_API_EMPTY",
-                        Severity.Error);
+                    throw new ValidationException("External data empty.", "EXT_API_EMPTY", Severity.Error);
 
                 return users.Select(u => new ExternalUserDto
                 {
-                    Id = (int)u.id,
-                    Name = (string)u.name,
-                    Username = (string)u.username,
-                    Email = (string)u.email,
-                    Street = (string)u.address.street,
-                    City = (string)u.address.city,
-                    Lat = decimal.Parse((string)u.address.geo.lat),
-                    Lng = decimal.Parse((string)u.address.geo.lng),
-                    Website = (string?)u.website,
-                    CompanyName = (string)u.company.name
+                    Id = u.GetProperty("id").GetInt32(),
+                    Name = u.GetProperty("name").GetString()!,
+                    Username = u.GetProperty("username").GetString()!,
+                    Email = u.GetProperty("email").GetString()!,
+
+                    Street = u.GetProperty("address").GetProperty("street").GetString()!,
+                    City = u.GetProperty("address").GetProperty("city").GetString()!,
+
+                    Lat = double.Parse(u.GetProperty("address").GetProperty("geo").GetProperty("lat").GetString()!),
+                    Lng = double.Parse(u.GetProperty("address").GetProperty("geo").GetProperty("lng").GetString()!),
+
+                    Website = u.GetProperty("website").GetString(),
+                    CompanyName = u.GetProperty("company").GetProperty("name").GetString()!,
                 });
+
             }
             catch (HttpRequestException)
             {

@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Dapper;
 using Domain.Entities;
+using Internship_4_OOP2.Domain.ValueObjects;
 using Internship_4_OOP2.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -19,16 +20,50 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
         }
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            var sql = "SELECT * FROM Users";
-            var users = await _connection.QueryAsync<User>(sql);
-            return users;
+            var sql = "SELECT id, name, username, email, address_street, address_city, geo_lat, geo_lng, website, password, created_at, updated_at, is_active FROM users";
+
+            var result = await _connection.QueryAsync(sql);
+
+            return result.Select(x => new User(
+                x.id,
+                x.name,
+                x.username,
+                new Email((string)x.email),
+                x.address_street,
+                x.address_city,
+                new GeoLocation((double)x.geo_lat, (double)x.geo_lng),
+                x.website != null ? new Website((string)x.website) : null,
+                x.password,
+                x.created_at,
+                x.updated_at,
+                x.is_active
+            ));
         }
+
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            var sql = "SELECT * FROM Users WHERE Id = @id";
-            return await _connection.QueryFirstOrDefaultAsync<User>(sql, new { id });
+            var sql = "SELECT * FROM users WHERE id=@id";
+            var result = await _connection.QueryFirstOrDefaultAsync(sql, new { id });
+
+            if (result == null) return null;
+
+            return new User(
+                result.id,
+                result.name,
+                result.username,
+                new Email((string)result.email),
+                result.address_street,
+                result.address_city,
+                new GeoLocation((double)result.geo_lat, (double)result.geo_lng),
+                result.website != null ? new Website((string)result.website) : null,
+                result.password,
+                result.created_at,
+                result.updated_at,
+                result.is_active
+            );
         }
+
 
 
         public async Task AddAsync(User user)
@@ -40,6 +75,7 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
         public async Task UpdateAsync(User user)
         {
             _context.Users.Update(user);
+
             await _context.SaveChangesAsync();
         }
 
@@ -54,12 +90,14 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
-            => await _context.Users.AnyAsync(u => u.Email.Value == email);
+            => await _context.Users.AnyAsync(u => u.Email == new Email(email));
 
-        public async Task<bool> ExistsByUsernameAsync(string username) 
+        public async Task<bool> ExistsByUsernameAsync(string username)
             => await _context.Users.AnyAsync(u => u.Username == username);
 
         public async Task<User?> GetByCredentialsAsync(string username, string password)
-            => await _context.Users.FirstOrDefaultAsync(x => x.Username == username && x.Password == password);
+            => await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
+
+
     }
 }

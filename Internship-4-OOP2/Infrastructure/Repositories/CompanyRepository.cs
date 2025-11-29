@@ -9,8 +9,8 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
 {
     public class CompanyRepository : ICompanyRepository
     {
-        private readonly CompaniesDbContext _context;
-        private readonly IDbConnection _connection;
+        private readonly CompaniesDbContext _context; 
+        private readonly IDbConnection _connection;  
 
         public CompanyRepository(CompaniesDbContext context, IDbConnection connection)
         {
@@ -19,15 +19,11 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
         }
 
         public async Task<IEnumerable<Company>> GetAllAsync()
-        {
-            return await _connection.QueryAsync<Company>("SELECT * FROM Companies");
-        }
+            => await _connection.QueryAsync<Company>("SELECT * FROM companies");
 
         public async Task<Company?> GetByIdAsync(int id)
-        {
-            return await _connection.QueryFirstOrDefaultAsync<Company>(
-                "SELECT * FROM Companies WHERE Id = @id", new { id });
-        }
+            => await _connection.QueryFirstOrDefaultAsync<Company>(
+                "SELECT * FROM companies WHERE id=@id", new { id });
 
         public async Task AddAsync(Company company)
         {
@@ -44,12 +40,12 @@ namespace Internship_4_OOP2.Infrastructure.Repositories
         public async Task DeleteAsync(int id)
         {
             var c = await _context.Companies.FindAsync(id);
-            if (c != null)
-            {
-                _context.Companies.Remove(c);
-                await _context.SaveChangesAsync();
-            }
+            if (c is null) return;
+
+            _context.Companies.Remove(c);
+            await _context.SaveChangesAsync();
         }
+
         public async Task<bool> ExistsByNameAsync(string name)
             => await _context.Companies.AnyAsync(c => c.Name == name);
     }

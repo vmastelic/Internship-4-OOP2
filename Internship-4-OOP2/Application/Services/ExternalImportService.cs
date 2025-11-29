@@ -29,20 +29,21 @@ namespace Internship_4_OOP2.Application.Services
 
         public async Task ImportExternalUsersAsync()
         {
+
             var info = await _externalImportInfoRepository.GetAsync();
+
             if (info != null && info.IsCacheValid())
-                return;
+                return; 
 
             IEnumerable<ExternalUserDto> externalUsers;
-
             try
             {
                 externalUsers = await _externalUserService.GetExternalUsersAsync();
             }
-            catch (Exception)
+            catch
             {
                 throw new ValidationException(
-                    "External API is not available.",
+                    "External API unavailable.",
                     "EXT_API_UNAVAILABLE",
                     Severity.Error);
             }
@@ -51,22 +52,22 @@ namespace Internship_4_OOP2.Application.Services
             {
                 if (await _userRepository.ExistsByEmailAsync(ext.Email) ||
                     await _userRepository.ExistsByUsernameAsync(ext.Username))
-                {
-                    continue; 
-                }
+                    continue;
 
                 var email = new Email(ext.Email);
-                var website = new Website(ext.Website);
-                var location = new GeoLocation(ext.Lat, ext.Lng);
+                Website? website = null;
 
+                try { website = string.IsNullOrWhiteSpace(ext.Website) ? null : new Website(ext.Website); }
+                catch { website = null; }
+
+                var location = new GeoLocation(ext.Lat, ext.Lng);
                 var password = Guid.NewGuid().ToString();
 
-                Company? company = null;
                 if (!string.IsNullOrWhiteSpace(ext.CompanyName))
                 {
                     if (!await _companyRepository.ExistsByNameAsync(ext.CompanyName))
                     {
-                        company = new Company(ext.CompanyName);
+                        var company = new Company(ext.CompanyName);
                         await _companyRepository.AddAsync(company);
                     }
                 }
@@ -79,19 +80,16 @@ namespace Internship_4_OOP2.Application.Services
                     ext.City,
                     location,
                     website,
-                    password);
+                    password
+                );
 
                 await _userRepository.AddAsync(user);
             }
 
             if (info == null)
-            {
                 info = new ExternalImportInfo(DateTime.UtcNow);
-            }
             else
-            {
                 info.RefreshTimestamp();
-            }
 
             await _externalImportInfoRepository.SaveAsync(info);
         }

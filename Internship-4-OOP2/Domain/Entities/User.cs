@@ -51,6 +51,34 @@ namespace Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public User(
+            int id,
+            string name,
+            string username,
+            Email email,
+            string addressStreet,
+            string addressCity,
+            GeoLocation location,
+            Website? website,
+            string password,
+            DateTime createdAt,
+            DateTime updatedAt,
+            bool isActive)
+        {
+            Id = id;
+            Name = name;
+            Username = username;
+            Email = email;
+            AddressStreet = addressStreet;
+            AddressCity = addressCity;
+            Location = location;
+            Website = website;
+            Password = password;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
+            IsActive = isActive;
+        }
+
         private void Validate(string name, string username, string street, string city)
         {
             if (string.IsNullOrWhiteSpace(name) || name.Length > NameMaxLength)
